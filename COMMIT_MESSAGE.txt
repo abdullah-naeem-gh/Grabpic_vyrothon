@@ -1,0 +1,48 @@
+Add comprehensive pytest test suite with 23 tests
+
+Implement complete test coverage for all GrabPic API endpoints using pytest
+with real test images from photos/ directory.
+
+Test Files:
+- tests/conftest.py: Fixtures for test_client, clean_db, sample images
+- tests/test_ingest.py: 6 tests for /ingest endpoint
+- tests/test_auth.py: 9 tests for /auth/selfie endpoint
+- tests/test_images.py: 8 tests for /images/{grab_id} endpoint
+
+Test Coverage:
+- Happy path flows (ingest → auth → fetch images)
+- Error handling (400, 401, 404, 413, 415, 422)
+- Edge cases (empty dirs, no faces, unknown faces)
+- Security (SQL injection, XSS, path traversal attempts)
+- Idempotency verification
+- Multi-user isolation
+
+Key Features:
+- Uses real test images from photos/ directory
+- Auto-detects Docker vs local environment
+- Clean database state per test via clean_db fixture
+- Comprehensive error scenario coverage
+- Security vulnerability testing
+
+Configuration:
+- pytest.ini: Test discovery and pytest settings
+- .env.test: Test environment with localhost database
+- run_tests.sh: Automated test runner with memory management
+
+Documentation:
+- tests/README.md: Test suite overview
+- docs/testing-guide.md: Comprehensive testing guide (291 lines)
+- TESTING_SUMMARY.md: Executive summary
+- TEST_COMMANDS.md: Command reference cheatsheet
+- tests/COMPLETED.md: Implementation summary
+
+Dependencies:
+- Added pytest==7.4.3
+- Added pytest-asyncio==0.21.1
+- Added httpx==0.25.2
+- Added pillow==10.1.0
+
+Run tests: pytest tests/ -v
+Or in Docker: docker exec grabpic_app python -m pytest tests/ -v
+
+Total: 23 tests, ~1,500 lines of test code + documentation
