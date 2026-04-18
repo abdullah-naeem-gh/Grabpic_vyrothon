@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from .database import run_migrations, get_connection, release_connection
-from .routers import ingest
+from .routers import ingest, auth, images
 from contextlib import asynccontextmanager
 import logging
 
@@ -26,6 +26,8 @@ app = FastAPI(
 
 # Include routers
 app.include_router(ingest.router)
+app.include_router(auth.router)
+app.include_router(images.router)
 
 @app.get("/health")
 async def health():
