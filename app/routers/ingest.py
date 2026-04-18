@@ -81,11 +81,17 @@ async def ingest_uploaded_files(files: List[UploadFile] = File(...)):
     if not files:
         raise HTTPException(status_code=400, detail="No files uploaded")
     
-    # Create temporary directory for uploaded files
-    temp_dir = tempfile.mkdtemp(prefix="grabpic_upload_")
+    # Ensure photo directory exists
+    os.makedirs(settings.PHOTO_DIR, exist_ok=True)
+    
+    # Create uploads subdirectory with timestamp
+    from datetime import datetime
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    upload_dir = os.path.join(settings.PHOTO_DIR, f"upload_{timestamp}")
+    os.makedirs(upload_dir, exist_ok=True)
     
     try:
-        # Save uploaded files to temp directory
+        # Save uploaded files to permanent directory
         saved_count = 0
         for upload_file in files:
             # Validate file extension
@@ -94,22 +100,23 @@ async def ingest_uploaded_files(files: List[UploadFile] = File(...)):
                 logger.warning(f"Skipping non-image file: {upload_file.filename}")
                 continue
             
-            # Save file
-            file_path = os.path.join(temp_dir, upload_file.filename)
+            # Save file to permanent location
+            file_path = os.path.join(upload_dir, upload_file.filename)
             with open(file_path, "wb") as f:
                 content = await upload_file.read()
                 f.write(content)
             saved_count += 1
         
-        logger.info(f"Saved {saved_count} uploaded files to {temp_dir}")
+        logger.info(f"Saved {saved_count} uploaded files to {upload_dir}")
         
-        # Run ingestion on temporary directory
-        stats = ingest_directory(temp_dir)
+        # Run ingestion on permanent directory
+        stats = ingest_directory(upload_dir)
         
         # Store stats for status endpoint
         _last_run_stats = {
             "source": "upload",
             "files_uploaded": saved_count,
+            "upload_dir": upload_dir,
             "stats": stats
         }
         
@@ -118,13 +125,6 @@ async def ingest_uploaded_files(files: List[UploadFile] = File(...)):
     except Exception as e:
         logger.error(f"Upload ingestion failed: {e}")
         raise HTTPException(status_code=500, detail=f"Ingestion failed: {str(e)}")
-    finally:
-        # Clean up temporary directory
-        try:
-            shutil.rmtree(temp_dir)
-            logger.debug(f"Cleaned up temporary directory: {temp_dir}")
-        except Exception as e:
-            logger.warning(f"Failed to clean up temp directory {temp_dir}: {e}")
 
 
 @router.get("/status", response_model=IngestStatusResponse)
