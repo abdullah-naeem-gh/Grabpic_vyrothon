@@ -4,6 +4,8 @@ Grabpic is a high-performance facial recognition backend designed for large-scal
 
 **Tech Stack:** Python 3.11, FastAPI, DeepFace (VGG-Face), PostgreSQL + pgvector, Docker
 
+**🚀 Live Demo:** http://13.41.81.112:8000/docs
+
 ## Architecture
 
 ### Database Schema (3 tables)
