@@ -1,0 +1,39 @@
+services:
+  db:
+    image: pgvector/pgvector:pg15
+    container_name: grabpic_db
+    environment:
+      POSTGRES_DB: grabpic
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build: .
+    container_name: grabpic_app
+    volumes:
+      - .:/app
+      - photo_data:/photos
+    environment:
+      - DATABASE_URL=postgresql://postgres:password@db:5432/grabpic
+      - PHOTO_DIR=/photos
+      - SIMILARITY_THRESHOLD=0.4
+      - AUTH_THRESHOLD=0.6
+      - MODEL_NAME=VGG-Face
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+
+volumes:
+  db_data:
+  photo_data:
