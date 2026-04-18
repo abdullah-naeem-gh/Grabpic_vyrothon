@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from .database import run_migrations, get_connection, release_connection
+from .routers import ingest
 from contextlib import asynccontextmanager
 import logging
 
@@ -22,6 +23,9 @@ app = FastAPI(
     version="0.1.0",
     lifespan=lifespan
 )
+
+# Include routers
+app.include_router(ingest.router)
 
 @app.get("/health")
 async def health():
